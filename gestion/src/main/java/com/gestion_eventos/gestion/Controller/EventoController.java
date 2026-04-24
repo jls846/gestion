@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.gestion_eventos.gestion.Entity.Evento;
 import com.gestion_eventos.gestion.Service.EventoService;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/eventos")
 public class EventoController {
@@ -28,7 +29,7 @@ public class EventoController {
         return ResponseEntity.ok(nuevoEvento);
     }
 
-    // Buscar uno por ID: GET http://localhost:8080/api/eventos/{id}
+    
     @GetMapping("/{id}")
     public ResponseEntity<Evento> obtenerPorId(@PathVariable Long id) {
         Evento evento = eventoService.buscarPorId(id);

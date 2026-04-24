@@ -54,4 +54,24 @@ public List<Registro> getRegistros() { return registros; }
 public void setNombre(String nombre) { this.nombre = nombre; }
 public void setCapacidadMaxima(Integer capacidadMaxima) { this.capacidadMaxima = capacidadMaxima; }
 public void setRegistros(List<Registro> registros) { this.registros = registros; }
+public Long getId() { 
+    return id; 
+}
+
+public void setId(Long id) { 
+    this.id = id; 
+}
+
+// También te faltarán estos para que el formulario de React funcione al 100%:
+public String getDescripcion() { return descripcion; }
+public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+public String getLugar() { return lugar; }
+public void setLugar(String lugar) { this.lugar = lugar; }
+
+public String getOrganizador() { return organizador; }
+public void setOrganizador(String organizador) { this.organizador = organizador; }
+
+public LocalDateTime getFecha() { return fecha; }
+public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 }
