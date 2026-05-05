@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,7 +34,7 @@ public class Registro {
     @ManyToOne
     @JoinColumn(name = "evento_id")
     @ToString.Exclude 
-    @JsonIgnore
+    @JsonBackReference
     private Evento evento;
 
     
