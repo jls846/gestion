@@ -3,14 +3,12 @@ package com.gestion_eventos.gestion.Entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,28 +18,29 @@ public class Evento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
     private String descripcion;
     private LocalDateTime fecha;
     private String lugar;
 
-    @Min(value = 1, message = "La capacidad debe ser al menos 1")
+    @Min(value = 1)
     private Integer capacidadMaxima;
 
     private String organizador;
 
+    //Relación con las Inscripciones
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference
-    private List<Registro> registros = new ArrayList<>();
+    @JsonManagedReference(value = "evento-inscripcion") 
+    private List<Inscripcion> inscripciones = new ArrayList<>();
 
+    //Relación con el Usuario que lo creo
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    @JsonBackReference
+    @JsonIgnoreProperties({"eventosCreados", "inscripciones", "password"})
     private Usuario creador;
 
-    // --- GETTERS Y SETTERS MANUALES (Sin @Data para evitar errores 500) ---
+    // --- GETTERS Y SETTERS
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -64,9 +63,11 @@ public class Evento {
     public String getOrganizador() { return organizador; }
     public void setOrganizador(String organizador) { this.organizador = organizador; }
 
-    public List<Registro> getRegistros() { return registros; }
-    public void setRegistros(List<Registro> registros) { this.registros = registros; }
+    public List<Inscripcion> getInscripciones() { return inscripciones; }
+    public void setInscripciones(List<Inscripcion> inscripciones) { this.inscripciones = inscripciones; }
 
     public Usuario getCreador() { return creador; }
     public void setCreador(Usuario creador) { this.creador = creador; }
+
+    
 }
