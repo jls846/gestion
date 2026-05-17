@@ -20,8 +20,6 @@ public ResponseEntity<?> inscribir(@PathVariable Long eventoId, @PathVariable Lo
         Inscripcion nueva = inscripcionService.registrarAsistente(eventoId, usuarioId);
         return ResponseEntity.ok(nueva);
     } catch (RuntimeException e) {
-        // Aquí es donde el mensaje "No puedes inscribirte a tu propio evento" 
-        // viaja hacia tu React
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

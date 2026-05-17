@@ -1,46 +1,48 @@
 package com.gestion_eventos.gestion.Service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.gestion_eventos.gestion.Entity.Evento;
-import com.gestion_eventos.gestion.Entity.Usuario;
-import com.gestion_eventos.gestion.Repository.EventoRepository;
-import com.gestion_eventos.gestion.Repository.UsuarioRepository;
+import com.gestion_eventos.gestion.Entity.*;
+import com.gestion_eventos.gestion.Repository.*;
+import java.util.List;
 
 @Service
 public class EventoService {
 
-    @Autowired
-    private EventoRepository eventoRepository;
-    @Autowired 
-    private UsuarioRepository usuarioRepository; 
+    private final EventoRepository eventoRepository;
+    private final UsuarioRepository usuarioRepository; 
+    private final CategoriaRepository categoriaRepository;
+    
+    public EventoService(EventoRepository eventoRepository, 
+                         UsuarioRepository usuarioRepository, 
+                         CategoriaRepository categoriaRepository) {
+        this.eventoRepository = eventoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.categoriaRepository = categoriaRepository;
+    }
 
-public Evento guardarConUsuario(Evento evento, Long usuarioId) {
-    Usuario creador = usuarioRepository.findById(usuarioId)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-    evento.setCreador(creador); 
-    return eventoRepository.save(evento);
-}
-    // Obtener todos los eventos
+    public Evento registrarEventoCompleto(Evento evento, Long usuarioId) {
+        // 1. Buscamos y asignamos el creador
+        Usuario creador = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+        evento.setCreador(creador);
+
+        // 2. Sincronizamos las categorías enviadas en el JSON
+        List<Long> categoriaIds = evento.getCategorias().stream()
+                .map(Categoria::getId)
+                .toList();
+        
+        List<Categoria> categoriasReales = categoriaRepository.findAllById(categoriaIds);
+        evento.setCategorias(categoriasReales);
+
+        // 3. Guardamos todo (Se inserta en 'evento' y en 'evento_categoria')
+        return eventoRepository.save(evento);
+    }
+
     public List<Evento> listarTodos() {
         return eventoRepository.findAll();
     }
 
-    // Guardar un nuevo evento
-    public Evento guardar(Evento evento) {
-        return eventoRepository.save(evento);
-    }
-
-    // Buscar por ID
-    public Evento buscarPorId(Long id) {
-        return eventoRepository.findById(id).orElse(null);
-    }
-
-    // Eliminar
     public void eliminar(Long id) {
         eventoRepository.deleteById(id);
-}
+    }
 }

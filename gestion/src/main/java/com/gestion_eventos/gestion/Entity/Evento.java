@@ -33,7 +33,14 @@ public class Evento {
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference(value = "evento-inscripcion") 
     private List<Inscripcion> inscripciones = new ArrayList<>();
-
+    //Relación con la categoria
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "evento_categoria", //Tabla intermedia
+        joinColumns = @JoinColumn(name = "evento_id"),//llave del evento
+        inverseJoinColumns = @JoinColumn(name = "categoria_id") //lave de la categoria
+    )
+    private List<Categoria> categorias = new ArrayList<>();
     //Relación con el Usuario que lo creo
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -69,5 +76,11 @@ public class Evento {
     public Usuario getCreador() { return creador; }
     public void setCreador(Usuario creador) { this.creador = creador; }
 
-    
+    public List<Categoria> getCategorias() { 
+    return categorias; 
+}
+
+public void setCategorias(List<Categoria> categorias) { 
+    this.categorias = categorias; 
+}
 }

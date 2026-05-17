@@ -1,61 +1,76 @@
 package com.gestion_eventos.gestion.Controller;
 
-import java.util.List;
+import com.gestion_eventos.gestion.Entity.Evento;
+import com.gestion_eventos.gestion.Entity.Categoria;
+import com.gestion_eventos.gestion.Entity.Usuario;
+import com.gestion_eventos.gestion.Repository.EventoRepository;
+import com.gestion_eventos.gestion.Repository.CategoriaRepository;
+import com.gestion_eventos.gestion.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.gestion_eventos.gestion.Entity.Evento;
-import com.gestion_eventos.gestion.Entity.Usuario;
-import com.gestion_eventos.gestion.Repository.UsuarioRepository;
-import com.gestion_eventos.gestion.Repository.EventoRepository; // Importación limpia
-import com.gestion_eventos.gestion.Service.EventoService;
+import java.util.ArrayList;
+import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/eventos")
 public class EventoController {
 
     @Autowired
-    private EventoService eventoService;
-    
+    private EventoRepository eventoRepository;
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private EventoRepository eventoRepository;
+    private CategoriaRepository categoriaRepository;
 
-    // 1. Obtener eventos SOLO del usuario logueado
-    @GetMapping("/usuario/{username}")
-    public List<Evento> obtenerEventosPorUsuario(@PathVariable String username) {
-        return eventoRepository.findByCreadorUsername(username);
-    }
-
-    // 2. Crear evento asignándole el dueño
-@PostMapping("/usuario/{username}")
-public ResponseEntity<?> crearEvento(@PathVariable String username, @RequestBody Evento evento) {
-    // 1. Buscamos al usuario
-    java.util.Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(username);
-
-    // 2. Validamos si existe
-    if (usuarioOpt.isEmpty()) {
-        return ResponseEntity.badRequest().body("Error: El usuario '" + username + "' no existe.");
-    }
-
-    // 3. Si existe, procesamos
-    Usuario usuario = usuarioOpt.get();
-    evento.setCreador(usuario);
-    
-    try {
-        Evento nuevoEvento = eventoRepository.save(evento);
-        return ResponseEntity.ok(nuevoEvento);
-    } catch (Exception e) {
-        return ResponseEntity.internalServerError().body("Error al guardar el evento: " + e.getMessage());
-    }
-}
-    // 3. Este método ahora es "Global" (puedes usarlo para que los invitados vean todos los eventos)
+    // 1. Obtener TODOS los eventos del sistema (El que está llamando React ahora mismo)
     @GetMapping
-    public List<Evento> listar() {
-        return eventoService.listarTodos();
+    public ResponseEntity<List<Evento>> obtenerTodosLosEventos() {
+        // CORRECCIÓN: Usamos el repositorio directo que ya tienes inyectado arriba
+        List<Evento> eventos = eventoRepository.findAll(); 
+        return ResponseEntity.ok(eventos);
+    }
+
+    // 2. Crear un nuevo evento asociando el Usuario y sus Categorías Many-to-Many
+    @PostMapping("/usuario/{username}")
+    public ResponseEntity<?> crearEvento(@RequestBody Evento evento, @PathVariable String username) {
+        try {
+            // Buscar al usuario creador en la base de datos por su username
+            Usuario usuario = usuarioRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Error: Usuario '" + username + "' no encontrado."));
+            evento.setCreador(usuario);
+
+            // Procesar las categorías enviadas desde React
+            List<Categoria> categoriasCompletas = new ArrayList<>();
+            if (evento.getCategorias() != null && !evento.getCategorias().isEmpty()) {
+                for (Categoria cat : evento.getCategorias()) {
+                    if (cat.getId() != null) {
+                        categoriaRepository.findById(cat.getId())
+                                .ifPresent(categoriasCompletas::add);
+                    }
+                }
+            }
+
+            evento.setCategorias(categoriasCompletas);
+
+            // Guardar el evento (Inserta en tablas 'evento' y la intermedia 'evento_categoria')
+            Evento eventoGuardado = eventoRepository.save(evento);
+            return ResponseEntity.ok(eventoGuardado);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error interno del servidor: " + e.getMessage());
+        }
+    }
+
+    // 3. Obtener eventos de un usuario específico (Este lo tienes listo para cuando lo uses después)
+    @GetMapping("/usuario/{username}")
+    public ResponseEntity<List<Evento>> obtenerEventosPorUsuario(@PathVariable String username) {
+        List<Evento> eventos = eventoRepository.findByCreadorUsername(username);
+        return ResponseEntity.ok(eventos);
     }
 }
