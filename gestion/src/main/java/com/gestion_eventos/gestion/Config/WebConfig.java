@@ -7,8 +7,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
-
 @Configuration
 public class WebConfig {
 
@@ -17,16 +15,16 @@ public class WebConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // 1. Permitimos de forma explícita los orígenes de desarrollo de React
+        // Permitimos de forma explícita los orígenes de desarrollo de React
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:5173", 
                 "http://127.0.0.1:5173"
         ));
         
-        // 2. Habilitamos el paso de credenciales de manera segura
+        //Habilitamos el paso de credenciales de manera segura
         config.setAllowCredentials(true);
         
-        // 3. Declaramos explícitamente los encabezados permitidos en lugar del comodín de conflicto
+        // Declaramos explícitamente los encabezados permitidos en lugar del comodín de conflicto
         config.setAllowedHeaders(Arrays.asList(
                 "Origin", 
                 "Content-Type", 
@@ -35,7 +33,7 @@ public class WebConfig {
                 "X-Requested-With"
         ));
         
-        // 4. Métodos HTTP estándar para tu CRUD de eventos
+        // Métodos HTTP estándar para tu CRUD de eventos
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         
         // Aplicamos esta configuración a absolutamente todas las rutas del sistema

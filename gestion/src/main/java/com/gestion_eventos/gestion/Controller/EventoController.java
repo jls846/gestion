@@ -26,24 +26,21 @@ public class EventoController {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    // 1. Obtener TODOS los eventos del sistema (El que está llamando React ahora mismo)
+    // Obtener TODOS los eventos del sistema
     @GetMapping
     public ResponseEntity<List<Evento>> obtenerTodosLosEventos() {
-        // CORRECCIÓN: Usamos el repositorio directo que ya tienes inyectado arriba
         List<Evento> eventos = eventoRepository.findAll(); 
         return ResponseEntity.ok(eventos);
     }
 
-    // 2. Crear un nuevo evento asociando el Usuario y sus Categorías Many-to-Many
+    // Crear un nuevo evento asociando el Usuario y sus Categorías Many-to-Many
     @PostMapping("/usuario/{username}")
     public ResponseEntity<?> crearEvento(@RequestBody Evento evento, @PathVariable String username) {
         try {
-            // Buscar al usuario creador en la base de datos por su username
             Usuario usuario = usuarioRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Error: Usuario '" + username + "' no encontrado."));
             evento.setCreador(usuario);
 
-            // Procesar las categorías enviadas desde React
             List<Categoria> categoriasCompletas = new ArrayList<>();
             if (evento.getCategorias() != null && !evento.getCategorias().isEmpty()) {
                 for (Categoria cat : evento.getCategorias()) {
@@ -56,7 +53,6 @@ public class EventoController {
 
             evento.setCategorias(categoriasCompletas);
 
-            // Guardar el evento (Inserta en tablas 'evento' y la intermedia 'evento_categoria')
             Evento eventoGuardado = eventoRepository.save(evento);
             return ResponseEntity.ok(eventoGuardado);
 
@@ -67,10 +63,28 @@ public class EventoController {
         }
     }
 
-    // 3. Obtener eventos de un usuario específico (Este lo tienes listo para cuando lo uses después)
+    // 3. Obtener eventos de un usuario específico
     @GetMapping("/usuario/{username}")
     public ResponseEntity<List<Evento>> obtenerEventosPorUsuario(@PathVariable String username) {
         List<Evento> eventos = eventoRepository.findByCreadorUsername(username);
         return ResponseEntity.ok(eventos);
     }
+
+    // 4. NUEVO: Editar un evento existente por su ID
+    @PutMapping("/{id}")
+public ResponseEntity<?> actualizarEvento(@PathVariable Long id, @RequestBody Evento eventoData) {
+    return eventoRepository.findById(id)
+        .map(eventoExistente -> {
+            // Actualizamos únicamente las propiedades editables del formulario
+            eventoExistente.setNombre(eventoData.getNombre());
+            eventoExistente.setDescripcion(eventoData.getDescripcion());
+            eventoExistente.setLugar(eventoData.getLugar());
+            eventoExistente.setCapacidadMaxima(eventoData.getCapacidadMaxima());
+            
+            // Guardamos el objeto original de la BD modificado
+            Evento guardado = eventoRepository.save(eventoExistente);
+            return ResponseEntity.ok(guardado);
+        })
+        .orElse(ResponseEntity.notFound().build());
+}
 }
