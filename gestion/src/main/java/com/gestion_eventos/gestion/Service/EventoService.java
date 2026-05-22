@@ -21,12 +21,12 @@ public class EventoService {
     }
 
     public Evento registrarEventoCompleto(Evento evento, Long usuarioId) {
-        // 1. Buscamos y asignamos el creador
+        // Buscamos y asignamos el creador
         Usuario creador = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
         evento.setCreador(creador);
 
-        // 2. Sincronizamos las categorías enviadas en el JSON
+        // Sincronizamos las categorías enviadas en el JSON
         List<Long> categoriaIds = evento.getCategorias().stream()
                 .map(Categoria::getId)
                 .toList();
@@ -34,7 +34,7 @@ public class EventoService {
         List<Categoria> categoriasReales = categoriaRepository.findAllById(categoriaIds);
         evento.setCategorias(categoriasReales);
 
-        // 3. Guardamos todo (Se inserta en 'evento' y en 'evento_categoria')
+        // Guardamos todo (Se inserta en 'evento' y en 'evento_categoria')
         return eventoRepository.save(evento);
     }
 
