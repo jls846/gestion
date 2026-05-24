@@ -45,4 +45,25 @@ public class EventoService {
     public void eliminar(Long id) {
         eventoRepository.deleteById(id);
     }
+
+    //Cloudenary
+    public void actualizarImagenes(Long eventoId, String portadaUrl, List<String> galeriaUrls) {
+    Evento evento = eventoRepository.findById(eventoId)
+        .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + eventoId));
+
+    if (portadaUrl != null) {
+        evento.setPortadaUrl(portadaUrl);
+    }
+
+    if (galeriaUrls != null && !galeriaUrls.isEmpty()) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            evento.setGaleriaUrls(mapper.writeValueAsString(galeriaUrls));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al procesar galería");
+        }
+    }
+
+    eventoRepository.save(evento);
+}
 }

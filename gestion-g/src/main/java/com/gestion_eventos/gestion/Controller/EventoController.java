@@ -6,6 +6,8 @@ import com.gestion_eventos.gestion.Entity.Usuario;
 import com.gestion_eventos.gestion.Repository.EventoRepository;
 import com.gestion_eventos.gestion.Repository.CategoriaRepository;
 import com.gestion_eventos.gestion.Repository.UsuarioRepository;
+import com.gestion_eventos.gestion.DTO.EventoImagenRequest;//NUEVO COMPONENTE,RESIVE EL ENDPOINT DE LAS IMAGENES
+import com.gestion_eventos.gestion.Service.EventoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,10 @@ public class EventoController {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+    
+    //Cloudery
+    @Autowired
+    private EventoService eventoService;
 
     // Obtener TODOS los eventos del sistema
     @Operation(summary="Obtencion de todos nuestros eventos")
@@ -101,4 +107,24 @@ public ResponseEntity<?> actualizarEvento(@Parameter(description="Id del evento 
         })
         .orElse(ResponseEntity.notFound().build());
 }
+
+//Cloudery
+
+@Operation(summary = "Actualizar imágenes de un evento")
+@PutMapping("/{id}/imagenes")
+public ResponseEntity<?> actualizarImagenes(
+        @PathVariable Long id,
+        @RequestBody EventoImagenRequest request) {
+    try {
+        eventoService.actualizarImagenes(
+            id,
+            request.getPortadaUrl(),
+            request.getGaleriaUrls()
+        );
+        return ResponseEntity.ok("Imágenes guardadas correctamente");
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(e.getMessage());
+    }
+}
+
 }

@@ -32,6 +32,13 @@ public class Evento {
     private Integer capacidadMaxima;
 
     private String organizador;
+    
+    // Cloudery
+@Column(name = "portada_url", length = 500)
+private String portadaUrl;
+
+@Column(name = "galeria_urls", columnDefinition = "TEXT")
+private String galeriaUrls;
 
     //Relación con las Inscripciones
     @OneToMany(mappedBy = "evento", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -79,6 +86,12 @@ public class Evento {
 
     public Usuario getCreador() { return creador; }
     public void setCreador(Usuario creador) { this.creador = creador; }
+
+    public String getPortadaUrl() { return portadaUrl; }
+public void setPortadaUrl(String portadaUrl) { this.portadaUrl = portadaUrl; }
+
+public String getGaleriaUrls() { return galeriaUrls; }
+public void setGaleriaUrls(String galeriaUrls) { this.galeriaUrls = galeriaUrls; }
 
     public List<Categoria> getCategorias() { 
     return categorias; 
